@@ -159,23 +159,89 @@ tbody tr:hover{background:#f8fafc}
   content:'';position:absolute;inset:6px;
   border:1px solid #C9A24A;border-radius:2px;
 }
+
+/* ─── Left navy ribbon (fancy) ─── */
 .cert-preview .ribbon{
-  position:absolute;left:22px;top:110px;bottom:110px;width:70px;
-  background:linear-gradient(180deg,#0B2A52 0%,#142B4A 50%,#0B2A52 100%);
+  position:absolute;
+  left:26px;
+  top:90px;
+  bottom:90px;
+  width:78px;
+  background:linear-gradient(180deg,#000 0%,#0B2A52 8%,#0B2A52 92%,#000 100%);
   color:#FAF7F0;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:26px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:18px;
   z-index:4;
-  clip-path:polygon(0 0, 100% 0, 100% 92%, 50% 100%, 0 92%);
+  padding:22px 0;
+  border:2px solid #C9A24A;
+  border-radius:6px 6px 14px 14px;
+  box-shadow:
+    inset 0 0 0 1px rgba(201,162,74,0.5),
+    0 4px 12px rgba(0,0,0,0.25);
 }
-.cert-preview .ribbon .item{text-align:center;color:#FAF7F0}
-.cert-preview .ribbon .item i{font-size:1.1rem;display:block;margin-bottom:6px;color:#FAF7F0}
+.cert-preview .ribbon::before{
+  content:'';
+  position:absolute;
+  top:-10px;left:50%;transform:translateX(-50%);
+  width:20px;height:12px;
+  background:#0B2A52;
+  border:2px solid #C9A24A;
+  border-bottom:none;
+  border-radius:20px 20px 0 0;
+}
+.cert-preview .ribbon::after{
+  content:'';
+  position:absolute;
+  bottom:-14px;left:50%;transform:translateX(-50%);
+  width:30px;height:16px;
+  background:#0B2A52;
+  border:2px solid #C9A24A;
+  border-top:none;
+  clip-path:polygon(0 0, 100% 0, 50% 100%);
+}
+.cert-preview .ribbon .item{
+  text-align:center;
+  color:#FAF7F0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+}
+.cert-preview .ribbon .item i{
+  font-size:1.4rem;
+  color:#C9A24A;
+  display:block;
+}
 .cert-preview .ribbon .item span{
-  display:block;font-family:'Cinzel',serif;font-size:0.55rem;
-  letter-spacing:1.5px;font-weight:600;line-height:1.3;
-  max-width:62px;margin:0 auto;
+  display:block;
+  font-family:'Cinzel',serif;
+  font-size:0.5rem;
+  letter-spacing:1.5px;
+  font-weight:600;
+  line-height:1.3;
+  color:#FAF7F0;
+  max-width:64px;
+  margin:0 auto;
 }
-.cert-preview .ribbon .sep{width:34px;height:1px;background:#C9A24A}
+.cert-preview .ribbon .sep{
+  width:44px;
+  height:1px;
+  background:linear-gradient(90deg,transparent,#C9A24A,transparent);
+  position:relative;
+}
+.cert-preview .ribbon .sep::after{
+  content:'◆';
+  position:absolute;
+  top:-6px;left:50%;transform:translateX(-50%);
+  color:#C9A24A;
+  font-size:0.5rem;
+  background:#0B2A52;
+  padding:0 4px;
+}
+
 .cert-preview .inner{
   position:absolute;inset:0;
   padding:38px 60px 34px 130px;
@@ -183,8 +249,23 @@ tbody tr:hover{background:#f8fafc}
   z-index:5;
   text-align:center;
 }
-.cert-preview .emblem{width:64px;height:74px;margin-bottom:8px}
-.cert-preview .emblem svg{width:100%;height:100%;display:block}
+
+/* ─── Logo emblem ─── */
+.cert-preview .emblem{
+  width:88px;
+  height:88px;
+  margin-bottom:6px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.cert-preview .emblem img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+}
+
 .cert-preview .institute{
   font-family:'Cinzel',serif;font-weight:700;
   color:#0B2A52;font-size:1.05rem;letter-spacing:1.5px;
@@ -342,6 +423,37 @@ tbody tr:hover{background:#f8fafc}
     border-radius: 0; box-shadow: none;
     max-width: none;
   }
+  /* Force deep ink on print */
+  .cert-preview,
+  .cert-preview * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+  .cert-preview { background: #FFFFFF !important; }
+  .cert-preview .institute,
+  .cert-preview .title,
+  .cert-preview .title-sub,
+  .cert-preview .student-name,
+  .cert-preview .body-text,
+  .cert-preview .body-text .course,
+  .cert-preview .certify-line,
+  .cert-preview .bottom-row .lbl,
+  .cert-preview .bottom-row .val,
+  .cert-preview .bottom-row .sign,
+  .cert-preview .bottom-row .role,
+  .cert-preview .bottom-row .person {
+    color: #000000 !important;
+    -webkit-text-stroke: 0.15px #000000;
+    text-shadow: 0 0 0.3px #000000;
+  }
+  .cert-preview .frame,
+  .cert-preview .frame::before {
+    border-color: #000000 !important;
+  }
+  .cert-preview .ribbon { background: #000000 !important; }
+  .cert-preview .badge-exc { background: #B8860B !important; color: #000000 !important; }
+
   .modal-backdrop {
     position: static !important;
     display: block !important;
@@ -742,14 +854,14 @@ function renderCertsTable(list) {
         <td>${fmtDate(c.issued_date)}</td>
         <td>${c.revoked ? '<span class="badge badge-revoked">Revoked</span>' : '<span class="badge badge-valid">Valid</span>'}</td>
         <td>
-  <button class="btn btn-primary btn-sm" onclick="viewCert('${esc(c.certificate_id)}')" title="View"><i class="fas fa-eye"></i></button>
-  ${!c.revoked ? `
-    <button class="btn btn-danger btn-sm" onclick="revokeCert('${esc(c.id)}', '${esc(c.certificate_id)}')" style="margin-left:4px" title="Revoke"><i class="fas fa-ban"></i></button>
-  ` : `
-    <button class="btn btn-warning btn-sm" onclick="restoreCert('${esc(c.id)}', '${esc(c.certificate_id)}')" style="margin-left:4px" title="Restore"><i class="fas fa-undo"></i></button>
-    <button class="btn btn-success btn-sm" onclick="reissueCert('${esc(c.id)}', '${esc(c.certificate_id)}')" style="margin-left:4px" title="Re-issue new certificate"><i class="fas fa-redo"></i></button>
-  `}
-</td>
+          <button class="btn btn-primary btn-sm" onclick="viewCert('${esc(c.certificate_id)}')" title="View"><i class="fas fa-eye"></i></button>
+          ${!c.revoked ? `
+            <button class="btn btn-danger btn-sm" onclick="revokeCert('${esc(c.id)}', '${esc(c.certificate_id)}')" style="margin-left:4px" title="Revoke"><i class="fas fa-ban"></i></button>
+          ` : `
+            <button class="btn btn-warning btn-sm" onclick="restoreCert('${esc(c.id)}', '${esc(c.certificate_id)}')" style="margin-left:4px" title="Restore"><i class="fas fa-undo"></i></button>
+            <button class="btn btn-success btn-sm" onclick="reissueCert('${esc(c.id)}', '${esc(c.certificate_id)}')" style="margin-left:4px" title="Re-issue"><i class="fas fa-redo"></i></button>
+          `}
+        </td>
       </tr>
     `).join('')}</tbody>
   </table></div>`;
@@ -765,7 +877,6 @@ async function revokeCert(id, certId) {
     alert('❌ ' + (err.data?.error || err.message));
   }
 }
-
 async function restoreCert(id, certId) {
   if (!confirm(`Restore certificate ${certId}?\n\nThis will make it valid again with the same ID.`)) return;
   try {
@@ -777,7 +888,6 @@ async function restoreCert(id, certId) {
     alert('❌ ' + (err.data?.error || err.message));
   }
 }
-
 async function reissueCert(id, certId) {
   if (!confirm(`Re-issue a NEW certificate for the same student and course?\n\n• Old certificate (${certId}) stays revoked\n• New certificate gets a fresh ID\n• You'll need to print the new one`)) return;
   try {
@@ -863,13 +973,7 @@ async function viewCert(certificateId) {
 
         <div class="inner">
           <div class="emblem">
-            <svg viewBox="0 0 64 74" xmlns="http://www.w3.org/2000/svg">
-              <path d="M32 2 L60 12 L60 38 Q60 60 32 72 Q4 60 4 38 L4 12 Z" fill="#0B2A52" stroke="#C9A24A" stroke-width="2"/>
-              <rect x="18" y="26" width="28" height="18" rx="2" fill="#FAF7F0"/>
-              <rect x="20" y="28" width="24" height="14" fill="#0B2A52"/>
-              <rect x="26" y="46" width="12" height="3" fill="#FAF7F0"/>
-              <rect x="22" y="49" width="20" height="2" fill="#FAF7F0"/>
-            </svg>
+            <img src="logo.png" alt="Nexora Academy">
           </div>
 
           <div class="institute">NEXORA COMPUTER STUDIES INSTITUTE</div>
