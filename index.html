@@ -160,7 +160,26 @@ tbody tr:hover{background:#f8fafc}
   border:1px solid #C9A24A;border-radius:2px;
 }
 
-/* ─── Left navy ribbon (fancy) ─── */
+/* ─── NEW: Official stamp on far-left ─── */
+.cert-preview .official-stamp{
+  position:absolute;
+  left:-6px;
+  top:50%;
+  transform:translateY(-50%) rotate(-12deg);
+  width:120px;
+  height:120px;
+  z-index:6;
+  opacity:0.9;
+  pointer-events:none;
+}
+.cert-preview .official-stamp img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+}
+
+/* ─── Left navy ribbon (unchanged) ─── */
 .cert-preview .ribbon{
   position:absolute;
   left:26px;
@@ -249,8 +268,6 @@ tbody tr:hover{background:#f8fafc}
   z-index:5;
   text-align:center;
 }
-
-/* ─── Logo emblem ─── */
 .cert-preview .emblem{
   width:88px;
   height:88px;
@@ -265,7 +282,6 @@ tbody tr:hover{background:#f8fafc}
   object-fit:contain;
   display:block;
 }
-
 .cert-preview .institute{
   font-family:'Cinzel',serif;font-weight:700;
   color:#0B2A52;font-size:1.05rem;letter-spacing:1.5px;
@@ -423,7 +439,6 @@ tbody tr:hover{background:#f8fafc}
     border-radius: 0; box-shadow: none;
     max-width: none;
   }
-  /* Force deep ink on print */
   .cert-preview,
   .cert-preview * {
     -webkit-print-color-adjust: exact !important;
@@ -448,11 +463,15 @@ tbody tr:hover{background:#f8fafc}
     text-shadow: 0 0 0.3px #000000;
   }
   .cert-preview .frame,
-  .cert-preview .frame::before {
-    border-color: #000000 !important;
-  }
+  .cert-preview .frame::before { border-color: #000000 !important; }
   .cert-preview .ribbon { background: #000000 !important; }
   .cert-preview .badge-exc { background: #B8860B !important; color: #000000 !important; }
+
+  /* Deep stamp ink */
+  .cert-preview .official-stamp { opacity: 1 !important; }
+  .cert-preview .official-stamp img {
+    filter: contrast(1.8) brightness(0.65) !important;
+  }
 
   .modal-backdrop {
     position: static !important;
@@ -943,6 +962,11 @@ async function viewCert(certificateId) {
         <div class="corner-tl"></div>
         <div class="corner-tr"></div>
         <div class="frame"></div>
+
+        <!-- ─── Official stamp (NEW — far left) ─── -->
+        <div class="official-stamp">
+          <img src="stamp.png" alt="Official Nexora Academy stamp">
+        </div>
 
         <div class="ribbon">
           <div class="item">
