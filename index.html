@@ -742,9 +742,14 @@ function renderCertsTable(list) {
         <td>${fmtDate(c.issued_date)}</td>
         <td>${c.revoked ? '<span class="badge badge-revoked">Revoked</span>' : '<span class="badge badge-valid">Valid</span>'}</td>
         <td>
-          <button class="btn btn-primary btn-sm" onclick="viewCert('${esc(c.certificate_id)}')"><i class="fas fa-eye"></i></button>
-          ${!c.revoked ? `<button class="btn btn-danger btn-sm" onclick="revokeCert('${esc(c.id)}', '${esc(c.certificate_id)}')" style="margin-left:4px"><i class="fas fa-ban"></i></button>` : ''}
-        </td>
+  <button class="btn btn-primary btn-sm" onclick="viewCert('${esc(c.certificate_id)}')" title="View"><i class="fas fa-eye"></i></button>
+  ${!c.revoked ? `
+    <button class="btn btn-danger btn-sm" onclick="revokeCert('${esc(c.id)}', '${esc(c.certificate_id)}')" style="margin-left:4px" title="Revoke"><i class="fas fa-ban"></i></button>
+  ` : `
+    <button class="btn btn-warning btn-sm" onclick="restoreCert('${esc(c.id)}', '${esc(c.certificate_id)}')" style="margin-left:4px" title="Restore"><i class="fas fa-undo"></i></button>
+    <button class="btn btn-success btn-sm" onclick="reissueCert('${esc(c.id)}', '${esc(c.certificate_id)}')" style="margin-left:4px" title="Re-issue new certificate"><i class="fas fa-redo"></i></button>
+  `}
+</td>
       </tr>
     `).join('')}</tbody>
   </table></div>`;
@@ -756,6 +761,31 @@ async function revokeCert(id, certId) {
     await api(`/certificates/${id}/revoke`, { method: 'POST', body: { reason: reason || 'Revoked by admin' } });
     alert('✅ Certificate revoked');
     loadAllCerts();
+  } catch (err) {
+    alert('❌ ' + (err.data?.error || err.message));
+  }
+}
+
+async function restoreCert(id, certId) {
+  if (!confirm(`Restore certificate ${certId}?\n\nThis will make it valid again with the same ID.`)) return;
+  try {
+    await api(`/certificates/${id}/restore`, { method: 'POST' });
+    alert('✅ Certificate restored');
+    loadAllCerts();
+    loadDashboard();
+  } catch (err) {
+    alert('❌ ' + (err.data?.error || err.message));
+  }
+}
+
+async function reissueCert(id, certId) {
+  if (!confirm(`Re-issue a NEW certificate for the same student and course?\n\n• Old certificate (${certId}) stays revoked\n• New certificate gets a fresh ID\n• You'll need to print the new one`)) return;
+  try {
+    const r = await api(`/certificates/${id}/reissue`, { method: 'POST' });
+    alert(`✅ Re-issued!\n\nOld: ${certId}\nNew: ${r.certificate.certificate_id}`);
+    loadAllCerts();
+    loadDashboard();
+    setTimeout(() => viewCert(r.certificate.certificate_id), 500);
   } catch (err) {
     alert('❌ ' + (err.data?.error || err.message));
   }
