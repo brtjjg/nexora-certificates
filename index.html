@@ -64,6 +64,7 @@ a{text-decoration:none;color:inherit}
 .form-group label{display:block;font-weight:600;margin-bottom:0.4rem;color:var(--navy);font-size:0.88rem}
 .form-group input,.form-group select,.form-group textarea{width:100%;padding:11px 14px;border:2px solid #e2e8f0;border-radius:10px;font-size:0.95rem;font-family:inherit;background:var(--white);transition:all 0.15s}
 .form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 4px rgba(41,169,232,0.1)}
+.form-group textarea{resize:vertical;min-height:70px}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
 
 .btn{padding:10px 22px;border-radius:50px;font-weight:600;font-size:0.88rem;display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;font-family:inherit;transition:all 0.15s}
@@ -123,7 +124,7 @@ tbody tr:hover{background:#f8fafc}
    ═══════════════════════════════════════════════════════ */
 .cert-preview{
   position:relative;
-  background:#FAF7F0;
+  background:#FFFFFF;
   padding:0;
   border-radius:6px;
   box-shadow:0 20px 60px rgba(11,31,58,0.25);
@@ -141,12 +142,12 @@ tbody tr:hover{background:#f8fafc}
 .cert-preview .corner-tl{left:0;background:
   radial-gradient(circle at 0% 0%, #0B2A52 0%, #0B2A52 32%, transparent 33%),
   radial-gradient(circle at 0% 0%, #C9A24A 0%, #C9A24A 34%, transparent 35%),
-  radial-gradient(circle at 0% 0%, #FAF7F0 0%, #FAF7F0 36%, transparent 37%);
+  radial-gradient(circle at 0% 0%, #FFFFFF 0%, #FFFFFF 36%, transparent 37%);
 }
 .cert-preview .corner-tr{right:0;transform:scaleX(-1);background:
   radial-gradient(circle at 0% 0%, #0B2A52 0%, #0B2A52 32%, transparent 33%),
   radial-gradient(circle at 0% 0%, #C9A24A 0%, #C9A24A 34%, transparent 35%),
-  radial-gradient(circle at 0% 0%, #FAF7F0 0%, #FAF7F0 36%, transparent 37%);
+  radial-gradient(circle at 0% 0%, #FFFFFF 0%, #FFFFFF 36%, transparent 37%);
 }
 .cert-preview .frame{
   position:absolute;inset:22px;
@@ -160,7 +161,33 @@ tbody tr:hover{background:#f8fafc}
   border:1px solid #C9A24A;border-radius:2px;
 }
 
-/* ─── NEW: Official stamp on far-left ─── */
+/* ─── Faded "NEXORA ACADEMY" watermark ─── */
+.cert-preview .watermark{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  overflow:hidden;
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  grid-template-rows:repeat(3, 1fr);
+  opacity:0.07;
+}
+.cert-preview .watermark span{
+  font-family:'Cinzel',serif;
+  font-weight:800;
+  font-size:1.6rem;
+  letter-spacing:5px;
+  color:#0B2A52;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transform:rotate(-30deg);
+  white-space:nowrap;
+  user-select:none;
+}
+
+/* ─── Official stamp (left) ─── */
 .cert-preview .official-stamp{
   position:absolute;
   left:-6px;
@@ -179,7 +206,7 @@ tbody tr:hover{background:#f8fafc}
   display:block;
 }
 
-/* ─── Left navy ribbon (unchanged) ─── */
+/* ─── Left navy ribbon ─── */
 .cert-preview .ribbon{
   position:absolute;
   left:26px;
@@ -202,63 +229,35 @@ tbody tr:hover{background:#f8fafc}
     0 4px 12px rgba(0,0,0,0.25);
 }
 .cert-preview .ribbon::before{
-  content:'';
-  position:absolute;
-  top:-10px;left:50%;transform:translateX(-50%);
-  width:20px;height:12px;
-  background:#0B2A52;
-  border:2px solid #C9A24A;
-  border-bottom:none;
+  content:'';position:absolute;top:-10px;left:50%;transform:translateX(-50%);
+  width:20px;height:12px;background:#0B2A52;
+  border:2px solid #C9A24A;border-bottom:none;
   border-radius:20px 20px 0 0;
 }
 .cert-preview .ribbon::after{
-  content:'';
-  position:absolute;
-  bottom:-14px;left:50%;transform:translateX(-50%);
-  width:30px;height:16px;
-  background:#0B2A52;
-  border:2px solid #C9A24A;
-  border-top:none;
+  content:'';position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);
+  width:30px;height:16px;background:#0B2A52;
+  border:2px solid #C9A24A;border-top:none;
   clip-path:polygon(0 0, 100% 0, 50% 100%);
 }
 .cert-preview .ribbon .item{
-  text-align:center;
-  color:#FAF7F0;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:6px;
+  text-align:center;color:#FAF7F0;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
 }
-.cert-preview .ribbon .item i{
-  font-size:1.4rem;
-  color:#C9A24A;
-  display:block;
-}
+.cert-preview .ribbon .item i{font-size:1.4rem;color:#C9A24A;display:block}
 .cert-preview .ribbon .item span{
-  display:block;
-  font-family:'Cinzel',serif;
-  font-size:0.5rem;
-  letter-spacing:1.5px;
-  font-weight:600;
-  line-height:1.3;
-  color:#FAF7F0;
-  max-width:64px;
-  margin:0 auto;
+  display:block;font-family:'Cinzel',serif;font-size:0.5rem;
+  letter-spacing:1.5px;font-weight:600;line-height:1.3;
+  color:#FAF7F0;max-width:64px;margin:0 auto;
 }
 .cert-preview .ribbon .sep{
-  width:44px;
-  height:1px;
+  width:44px;height:1px;
   background:linear-gradient(90deg,transparent,#C9A24A,transparent);
   position:relative;
 }
 .cert-preview .ribbon .sep::after{
-  content:'◆';
-  position:absolute;
-  top:-6px;left:50%;transform:translateX(-50%);
-  color:#C9A24A;
-  font-size:0.5rem;
-  background:#0B2A52;
-  padding:0 4px;
+  content:'◆';position:absolute;top:-6px;left:50%;transform:translateX(-50%);
+  color:#C9A24A;font-size:0.5rem;background:#0B2A52;padding:0 4px;
 }
 
 .cert-preview .inner{
@@ -269,23 +268,13 @@ tbody tr:hover{background:#f8fafc}
   text-align:center;
 }
 .cert-preview .emblem{
-  width:88px;
-  height:88px;
-  margin-bottom:6px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  width:88px;height:88px;margin-bottom:6px;
+  display:flex;align-items:center;justify-content:center;
 }
-.cert-preview .emblem img{
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  display:block;
-}
+.cert-preview .emblem img{width:100%;height:100%;object-fit:contain;display:block}
 .cert-preview .institute{
   font-family:'Cinzel',serif;font-weight:700;
-  color:#0B2A52;font-size:1.05rem;letter-spacing:1.5px;
-  margin-top:2px;
+  color:#0B2A52;font-size:1.05rem;letter-spacing:1.5px;margin-top:2px;
 }
 .cert-preview .tagline{
   font-family:'Cinzel',serif;font-size:0.55rem;letter-spacing:2px;
@@ -340,6 +329,13 @@ tbody tr:hover{background:#f8fafc}
   font-size:1.15rem;letter-spacing:2px;color:#0B2A52;
   display:block;margin:4px 0;
 }
+.cert-preview .remarks-box{
+  margin-top:14px;padding:8px 16px;
+  border-left:3px solid #C9A24A;border-right:3px solid #C9A24A;
+  font-family:'Playfair Display',serif;font-style:italic;
+  font-size:0.78rem;color:#0B2A52;
+  max-width:560px;text-align:center;
+}
 .cert-preview .bottom-row{
   position:absolute;left:130px;right:60px;bottom:44px;
   display:grid;grid-template-columns:1fr 1fr 1fr;
@@ -359,13 +355,11 @@ tbody tr:hover{background:#f8fafc}
 .cert-preview .bottom-row .sign{
   font-family:'Great Vibes',cursive;
   font-size:1.4rem;color:#0B2A52;line-height:1;
-  border-bottom:1px solid #0B2A52;
-  padding-bottom:2px;margin-bottom:4px;
+  border-bottom:1px solid #0B2A52;padding-bottom:2px;margin-bottom:4px;
 }
 .cert-preview .bottom-row .role{
   font-family:'Cinzel',serif;
-  font-size:0.6rem;letter-spacing:2px;font-weight:700;
-  color:#0B2A52;
+  font-size:0.6rem;letter-spacing:2px;font-weight:700;color:#0B2A52;
 }
 .cert-preview .bottom-row .person{
   font-family:'Playfair Display',serif;
@@ -373,9 +367,9 @@ tbody tr:hover{background:#f8fafc}
 }
 .cert-preview .seal{
   width:80px;height:80px;border-radius:50%;
-  background:radial-gradient(circle,#FAF7F0 60%,#fff 61%);
+  background:radial-gradient(circle,#FFFFFF 60%,#fff 61%);
   border:2px solid #0B2A52;
-  box-shadow:0 0 0 3px #FAF7F0, 0 0 0 4px #C9A24A;
+  box-shadow:0 0 0 3px #FFFFFF, 0 0 0 4px #C9A24A;
   display:flex;align-items:center;justify-content:center;
   margin:0 auto 6px;position:relative;
 }
@@ -387,9 +381,7 @@ tbody tr:hover{background:#f8fafc}
   color:#0B2A52;text-align:center;line-height:1.1;
   letter-spacing:0.5px;padding:4px;
 }
-.cert-preview .seal .seal-ico{
-  position:absolute;top:6px;font-size:0.85rem;color:#0B2A52;
-}
+.cert-preview .seal .seal-ico{position:absolute;top:6px;font-size:0.85rem;color:#0B2A52}
 .cert-preview .badge-exc{
   position:absolute;top:34px;right:44px;
   width:96px;height:96px;border-radius:50%;
@@ -452,6 +444,7 @@ tbody tr:hover{background:#f8fafc}
   .cert-preview .student-name,
   .cert-preview .body-text,
   .cert-preview .body-text .course,
+  .cert-preview .remarks-box,
   .cert-preview .certify-line,
   .cert-preview .bottom-row .lbl,
   .cert-preview .bottom-row .val,
@@ -466,12 +459,10 @@ tbody tr:hover{background:#f8fafc}
   .cert-preview .frame::before { border-color: #000000 !important; }
   .cert-preview .ribbon { background: #000000 !important; }
   .cert-preview .badge-exc { background: #B8860B !important; color: #000000 !important; }
-
-  /* Deep stamp ink */
   .cert-preview .official-stamp { opacity: 1 !important; }
-  .cert-preview .official-stamp img {
-    filter: contrast(1.8) brightness(0.65) !important;
-  }
+  .cert-preview .official-stamp img { filter: contrast(1.8) brightness(0.65) !important; }
+  .cert-preview .watermark { opacity: 0.09 !important; }
+  .cert-preview .watermark span { color: #0B2A52 !important; }
 
   .modal-backdrop {
     position: static !important;
@@ -595,9 +586,21 @@ tbody tr:hover{background:#f8fafc}
               </select>
             </div>
             <div class="form-group">
-              <label>Issue Date</label>
-              <input type="text" value="Today (auto)" disabled>
+              <label>Certificate Type <span style="color:var(--danger)">*</span></label>
+              <select id="issueType" required>
+                <option value="Completion" selected>Completion</option>
+                <option value="Participation">Participation</option>
+                <option value="Achievement">Achievement</option>
+                <option value="Excellence">Excellence</option>
+                <option value="Attendance">Attendance</option>
+                <option value="Professional Development">Professional Development</option>
+              </select>
             </div>
+          </div>
+          <div class="form-group">
+            <label>Remarks (optional)</label>
+            <textarea id="issueRemarks" rows="3" placeholder="e.g. Completed with distinction. Outstanding performance in all modules." maxlength="500"></textarea>
+            <div style="font-size:0.75rem;color:var(--text-secondary);margin-top:0.3rem">Max 500 characters. Displayed on the certificate.</div>
           </div>
           <button type="submit" class="btn btn-success" id="issueBtn">
             <i class="fas fa-certificate"></i> Issue Certificate
@@ -813,6 +816,8 @@ async function issueCertificate(e) {
   const user_id = document.getElementById('issueStudent').value;
   const course_id = document.getElementById('issueCourse').value;
   const grade = document.getElementById('issueGrade').value;
+  const certificate_type = document.getElementById('issueType').value;
+  const remarks = document.getElementById('issueRemarks').value.trim() || null;
   if (!user_id || !course_id) {
     showFlash('issueFlash', '⚠️ Select both a student and a course', 'warning');
     return;
@@ -820,10 +825,12 @@ async function issueCertificate(e) {
   btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Issuing...';
   document.getElementById('issueFlash').innerHTML = '';
   try {
-    const r = await api('/certificates', { method: 'POST', body: { user_id, course_id, grade } });
+    const r = await api('/certificates', { method: 'POST', body: { user_id, course_id, grade, certificate_type, remarks } });
     showFlash('issueFlash', `✅ Certificate <strong>${esc(r.certificate.certificate_id)}</strong> issued!`, 'success');
     document.getElementById('issueStudent').value = '';
     document.getElementById('issueCourse').value = '';
+    document.getElementById('issueRemarks').value = '';
+    document.getElementById('issueType').value = 'Completion';
     setTimeout(() => viewCert(r.certificate.certificate_id), 900);
   } catch (err) {
     showFlash('issueFlash', '❌ ' + (err.data?.error || err.message), 'danger');
@@ -862,13 +869,14 @@ function renderCertsTable(list) {
   }
   el.innerHTML = `<div class="table-wrap"><table>
     <thead><tr>
-      <th>Certificate ID</th><th>Student</th><th>Course</th><th>Grade</th><th>Issued</th><th>Status</th><th>Actions</th>
+      <th>Certificate ID</th><th>Student</th><th>Course</th><th>Type</th><th>Grade</th><th>Issued</th><th>Status</th><th>Actions</th>
     </tr></thead>
     <tbody>${list.map(c => `
       <tr>
         <td><strong style="color:var(--navy)">${esc(c.certificate_id)}</strong></td>
         <td>${esc(c.student_name)}</td>
         <td>${esc(c.course_name)}</td>
+        <td>${esc(c.certificate_type || 'Completion')}</td>
         <td>${esc(c.grade || '—')}</td>
         <td>${fmtDate(c.issued_date)}</td>
         <td>${c.revoked ? '<span class="badge badge-revoked">Revoked</span>' : '<span class="badge badge-valid">Valid</span>'}</td>
@@ -908,7 +916,7 @@ async function restoreCert(id, certId) {
   }
 }
 async function reissueCert(id, certId) {
-  if (!confirm(`Re-issue a NEW certificate for the same student and course?\n\n• Old certificate (${certId}) stays revoked\n• New certificate gets a fresh ID\n• You'll need to print the new one`)) return;
+  if (!confirm(`Re-issue a NEW certificate for the same student and course?\n\n• Old certificate (${certId}) stays revoked\n• New certificate gets a fresh ID`)) return;
   try {
     const r = await api(`/certificates/${id}/reissue`, { method: 'POST' });
     alert(`✅ Re-issued!\n\nOld: ${certId}\nNew: ${r.certificate.certificate_id}`);
@@ -935,6 +943,7 @@ async function doVerify() {
             <div><strong>ID:</strong> ${esc(data.certificate.certificate_id)}</div>
             <div><strong>Student:</strong> ${esc(data.certificate.student_name)}</div>
             <div><strong>Course:</strong> ${esc(data.certificate.course_name)}</div>
+            <div><strong>Type:</strong> ${esc(data.certificate.certificate_type || 'Completion')}</div>
             <div><strong>Grade:</strong> ${esc(data.certificate.grade || '—')}</div>
             <div><strong>Issued:</strong> ${fmtDate(data.certificate.issued_date)}</div>
           </div>
@@ -956,14 +965,18 @@ async function viewCert(certificateId) {
 
     const verifyUrl = `https://nexora-certificates.vercel.app/#verify/${encodeURIComponent(c.certificate_id)}`;
     const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=0&data=${encodeURIComponent(verifyUrl)}`;
+    const certType = (c.certificate_type || 'Completion').toUpperCase();
+
+    // Watermark repeated 9 times in a 3x3 grid
+    const watermarkCells = Array(9).fill('<span>NEXORA ACADEMY</span>').join('');
 
     document.getElementById('certModalContent').innerHTML = `
       <div class="cert-preview" id="certPrintArea">
+        <div class="watermark" aria-hidden="true">${watermarkCells}</div>
         <div class="corner-tl"></div>
         <div class="corner-tr"></div>
         <div class="frame"></div>
 
-        <!-- ─── Official stamp (NEW — far left) ─── -->
         <div class="official-stamp">
           <img src="stamp.png" alt="Official Nexora Academy stamp">
         </div>
@@ -1004,7 +1017,7 @@ async function viewCert(certificateId) {
           <div class="tagline">EMPOWERING MINDS, BUILDING FUTURES</div>
 
           <div class="title">CERTIFICATE</div>
-          <div class="title-sub">OF COMPLETION</div>
+          <div class="title-sub">OF ${certType}</div>
 
           <div class="certify-line">
             <span class="flourish">❦</span>
@@ -1026,6 +1039,8 @@ async function viewCert(certificateId) {
             and practical skills. This certificate is awarded in
             recognition of this achievement.
           </div>
+
+          ${c.remarks ? `<div class="remarks-box">"${esc(c.remarks)}"</div>` : ''}
         </div>
 
         <div class="qr-box">
