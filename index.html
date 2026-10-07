@@ -642,7 +642,8 @@ tbody tr:hover{background:#f8fafc}
     <div id="certModalContent"></div>
     <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1.5rem;flex-wrap:wrap">
       <button class="btn btn-outline" onclick="closeViewCert()">Close</button>
-      <button class="btn btn-primary" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
+      <button class="btn btn-success" onclick="downloadCert()"><i class="fas fa-download"></i> Download</button>
+<button class="btn btn-primary" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
     </div>
   </div>
 </div>
@@ -1085,6 +1086,35 @@ async function viewCert(certificateId) {
   }
 }
 
+function downloadCert() {
+    const certArea = document.getElementById('certPrintArea');
+    if (!certArea) { alert('No certificate to download'); return; }
+    const certId = (certArea.querySelector('.bottom-row .val')?.textContent || 'certificate').trim();
+    // Use browser's print-to-PDF feature (works everywhere, no library needed)
+    // Popup instructs user to "Save as PDF"
+    const w = window.open('', '_blank');
+    w.document.write(`
+      <html><head><title>${certId}</title>
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+      <style>
+        @page { size: A4 landscape; margin: 0; }
+        html, body { margin: 0; padding: 0; background: #fff; }
+        body > * { display: none; }
+        body > #certPrintArea { display: block !important; }
+      </style>
+      </head><body>${certArea.outerHTML}
+      <script>
+        window.addEventListener('load', () => {
+          setTimeout(() => { window.print(); }, 800);
+        });
+      <\/script>
+      </body></html>`);
+    w.document.close();
+}
+  
 function closeViewCert() {
   document.getElementById('viewCertModal').classList.remove('active');
 }
