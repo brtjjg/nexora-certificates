@@ -574,6 +574,7 @@ tbody tr:hover{background:#f8fafc}
             <label>Course <span style="color:var(--danger)">*</span></label>
             <select id="issueCourse" required><option value="">Loading courses...</option></select>
           </div>
+          <div id="auditPanel" class="hidden" style="margin-top:1.5rem;margin-bottom:1.5rem"></div>
           <div class="form-row">
             <div class="form-group">
               <label>Grade</label>
@@ -790,6 +791,144 @@ async function loadDashboard() {
   } catch (err) { console.error(err); }
 }
 
+/* ═══════════════════════════════════════════
+   STUDENT AUDIT PANEL
+   ═══════════════════════════════════════════ */
+async function loadStudentAudit(studentId) {
+  const panel = document.getElementById('auditPanel');
+  if (!studentId) { panel.classList.add('hidden'); panel.innerHTML = ''; return; }
+  panel.classList.remove('hidden');
+  panel.innerHTML = '<div class="empty-state" style="padding:1.5rem"><i class="fas fa-spinner fa-spin"></i><h3>Loading student audit…</h3></div>';
+  try {
+    const data = await api('/admin/students/' + studentId + '/audit');
+    renderAuditPanel(data);
+  } catch (err) {
+    panel.innerHTML = `<div class="empty-state" style="padding:1.5rem;color:#dc2626"><i class="fas fa-exclamation-triangle"></i><h3>Failed to load audit</h3><p>${esc(err.data?.error || err.message)}</p></div>`;
+  }
+}
+
+function renderAuditPanel(d) {
+  const panel = document.getElementById('auditPanel');
+  const s = d.student;
+  const e = d.eligibility;
+
+  // Verdict badge
+  const verdictStyles = {
+    ready:   { bg:'#dcfce7', fg:'#166534', icon:'✅', label:'READY TO ISSUE' },
+    partial: { bg:'#fef3c7', fg:'#92400e', icon:'⚠️', label:'ALMOST READY' },
+    not_ready:{ bg:'#fee2e2', fg:'#991b1b', icon:'⛔', label:'NOT READY' },
+  };
+  const v = verdictStyles[e.verdict] || verdictStyles.not_ready;
+
+  // Enrollments table
+  const enrHTML = !d.enrollments.length
+    ? '<p style="color:var(--text-secondary);font-size:0.85rem;padding:0.5rem 0">Not enrolled in any course.</p>'
+    : d.enrollments.map(en => `
+        <div style="padding:0.6rem 0;border-bottom:1px solid #f0f0f0">
+          <div style="display:flex;justify-content:space-between;gap:0.5rem;flex-wrap:wrap">
+            <strong style="color:var(--navy);font-size:0.88rem">${esc(en.course_title)}</strong>
+            <span style="font-size:0.78rem;color:var(--text-secondary)">${en.completed_lessons}/${en.total_lessons} lessons · ${en.progress_pct}%</span>
+          </div>
+          <div style="display:flex;gap:1rem;margin-top:0.3rem;font-size:0.75rem;color:var(--text-secondary)">
+            <span>💰 Paid: ${en.payment_pct}%</span>
+            <span>Remaining: $${en.remaining_balance.toFixed(2)}</span>
+          </div>
+          <div style="height:4px;background:#e2e8f0;border-radius:2px;margin-top:0.4rem;overflow:hidden">
+            <div style="width:${en.payment_pct}%;height:100%;background:linear-gradient(90deg,#29A9E8,#16A34A);"></div>
+          </div>
+        </div>`).join('');
+
+  // Exams
+  const examsHTML = !d.results.length
+    ? '<p style="color:var(--text-secondary);font-size:0.85rem;padding:0.5rem 0">No exam attempts yet.</p>'
+    : d.results.slice(0, 10).map(r => `
+        <div style="padding:0.45rem 0;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;font-size:0.82rem">
+          <span>${r.assessment_type === 'exam' ? '🎓 Final Exam' : '📝 CAT'}</span>
+          <span style="color:${r.passed ? '#16A34A' : '#dc2626'};font-weight:700">${r.score}/${r.total_marks} (${parseFloat(r.percentage).toFixed(0)}%)</span>
+        </div>`).join('');
+
+  // Groups
+  const groupsHTML = !d.groups.length
+    ? '<p style="color:var(--text-secondary);font-size:0.85rem;padding:0.5rem 0">Not in any group.</p>'
+    : d.groups.map(g => `
+        <div style="padding:0.45rem 0;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;font-size:0.82rem">
+          <span>💬 ${esc(g.name)}</span>
+          <span style="color:var(--text-secondary)">${g.my_messages} messages</span>
+        </div>`).join('');
+
+  // Certificates already issued
+  const certsHTML = !d.certificates_issued.length
+    ? '<p style="color:var(--text-secondary);font-size:0.85rem;padding:0.5rem 0">None issued yet.</p>'
+    : d.certificates_issued.map(c => `
+        <div style="padding:0.45rem 0;border-bottom:1px solid #f0f0f0;font-size:0.82rem">
+          <div style="display:flex;justify-content:space-between">
+            <span>${esc(c.course_name)}</span>
+            <span class="badge ${c.revoked ? 'badge-revoked' : 'badge-valid'}">${c.revoked ? 'REVOKED' : 'VALID'}</span>
+          </div>
+          <div style="font-size:0.72rem;color:var(--text-secondary);margin-top:2px">${esc(c.certificate_id)} · ${fmtDate(c.issued_date)}</div>
+        </div>`).join('');
+
+  // Warnings/reasons
+  const reasonsHTML = !e.reasons.length
+    ? '<div style="color:#166534;font-size:0.85rem;padding:0.5rem 0">✅ No blockers detected</div>'
+    : e.reasons.map(r => `<div style="color:#92400e;font-size:0.82rem;padding:0.25rem 0">⚠️ ${esc(r)}</div>`).join('');
+
+  panel.innerHTML = `
+    <!-- STUDENT HEADER -->
+    <div style="background:linear-gradient(135deg,#0B1F3A,#172B4D);color:#fff;padding:1.25rem;border-radius:14px 14px 0 0;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap">
+      <div>
+        <div style="font-size:0.7rem;letter-spacing:2px;opacity:0.7;text-transform:uppercase">Student Audit</div>
+        <h3 style="color:#fff;font-size:1.15rem;margin:0.2rem 0 0.15rem">${esc(s.full_name)}</h3>
+        <div style="font-size:0.82rem;opacity:0.85">${esc(s.email)} · ${esc(s.admission_number || 'No admission #')}</div>
+      </div>
+      <div style="text-align:center;background:rgba(255,255,255,0.1);padding:0.75rem 1rem;border-radius:12px">
+        <div style="font-size:2rem;font-weight:800;color:#E8C84A;line-height:1">${e.score}<span style="font-size:1rem;opacity:0.6">/${e.max}</span></div>
+        <div style="font-size:0.65rem;letter-spacing:1.5px;opacity:0.75;text-transform:uppercase;margin-top:3px">Eligibility</div>
+      </div>
+    </div>
+
+    <!-- VERDICT -->
+    <div style="background:${v.bg};color:${v.fg};padding:0.9rem 1.25rem;display:flex;align-items:center;gap:0.75rem;font-weight:700;font-size:0.9rem">
+      <span style="font-size:1.2rem">${v.icon}</span>
+      <span>${v.label} — ${esc(e.recommendation)}</span>
+    </div>
+
+    <!-- 4-COLUMN GRID -->
+    <div style="background:#fff;border-radius:0 0 14px 14px;overflow:hidden">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0">
+        <div style="padding:1rem 1.25rem;border-right:1px solid #e2e8f0">
+          <h4 style="color:var(--navy);font-size:0.82rem;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:0.6rem"><i class="fas fa-book"></i> Enrollments (${d.enrollments.length})</h4>
+          ${enrHTML}
+        </div>
+        <div style="padding:1rem 1.25rem">
+          <h4 style="color:var(--navy);font-size:0.82rem;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:0.6rem"><i class="fas fa-pencil-alt"></i> Exams (${d.results.length})</h4>
+          ${examsHTML}
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid #e2e8f0">
+        <div style="padding:1rem 1.25rem;border-right:1px solid #e2e8f0">
+          <h4 style="color:var(--navy);font-size:0.82rem;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:0.6rem"><i class="fas fa-comments"></i> Groups (${d.groups.length})</h4>
+          ${groupsHTML}
+        </div>
+        <div style="padding:1rem 1.25rem">
+          <h4 style="color:var(--navy);font-size:0.82rem;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:0.6rem"><i class="fas fa-certificate"></i> Certificates (${d.certificates_issued.length})</h4>
+          ${certsHTML}
+        </div>
+      </div>
+      <div style="border-top:1px solid #e2e8f0;padding:1rem 1.25rem;background:#f8fafc">
+        <h4 style="color:var(--navy);font-size:0.82rem;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:0.6rem"><i class="fas fa-info-circle"></i> Eligibility Notes</h4>
+        ${reasonsHTML}
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:0.9rem;font-size:0.82rem;color:var(--text-secondary)">
+          <span>💰 Total paid: <strong style="color:var(--navy)">$${parseFloat(d.payments.total_paid || 0).toFixed(2)}</strong></span>
+          <span>📄 Assignments: <strong style="color:var(--navy)">${d.assignments.submitted || 0}</strong></span>
+          <span>✅ Fully paid: <strong style="color:var(--navy)">${e.fully_paid_courses}</strong></span>
+          <span>🎓 Completed: <strong style="color:var(--navy)">${e.completed_courses}</strong></span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+  
 async function loadIssueDropdowns() {
   const studentSel = document.getElementById('issueStudent');
   const courseSel = document.getElementById('issueCourse');
@@ -803,6 +942,10 @@ async function loadIssueDropdowns() {
     studentSel.innerHTML = '<option value="">Select a student...</option>' +
       (students || []).map(s => `<option value="${s.id}">${esc(s.full_name)} — ${esc(s.email)}</option>`).join('');
     courseSel.innerHTML = '<option value="">Select a course...</option>' +
+      // Hook the dropdown to load the audit panel on selection
+studentSel.addEventListener('change', function() {
+  loadStudentAudit(this.value);
+});
       (courses || []).map(c => `<option value="${c.id}">${esc(c.title)}</option>`).join('');
   } catch (err) {
     studentSel.innerHTML = '<option value="">Failed to load students</option>';
@@ -829,6 +972,8 @@ async function issueCertificate(e) {
     const r = await api('/certificates', { method: 'POST', body: { user_id, course_id, grade, certificate_type, remarks } });
     showFlash('issueFlash', `✅ Certificate <strong>${esc(r.certificate.certificate_id)}</strong> issued!`, 'success');
     document.getElementById('issueStudent').value = '';
+    document.getElementById('auditPanel').classList.add('hidden');
+    document.getElementById('auditPanel').innerHTML = '';
     document.getElementById('issueCourse').value = '';
     document.getElementById('issueRemarks').value = '';
     document.getElementById('issueType').value = 'Completion';
