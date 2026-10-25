@@ -161,7 +161,6 @@ tbody tr:hover{background:#f8fafc}
   border:1px solid #C9A24A;border-radius:2px;
 }
 
-/* ─── Faded "NEXORA ACADEMY" watermark ─── */
 .cert-preview .watermark{
   position:absolute;
   inset:0;
@@ -187,7 +186,6 @@ tbody tr:hover{background:#f8fafc}
   user-select:none;
 }
 
-/* ─── Official stamp (left) ─── */
 .cert-preview .official-stamp{
   position:absolute;
   left:-6px;
@@ -206,7 +204,6 @@ tbody tr:hover{background:#f8fafc}
   display:block;
 }
 
-/* ─── Left navy ribbon ─── */
 .cert-preview .ribbon{
   position:absolute;
   left:26px;
@@ -420,68 +417,6 @@ tbody tr:hover{background:#f8fafc}
 .modal-box{background:#fff;border-radius:var(--radius);box-shadow:0 20px 60px rgba(0,0,0,0.3);max-width:1100px;width:100%;max-height:92vh;overflow-y:auto;padding:1.75rem;margin:auto}
 .modal-box h2{color:var(--navy);margin-bottom:1.25rem;display:flex;align-items:center;gap:10px;font-size:1.15rem}
 
-/* PRINT */
-@media print {
-  body * { visibility: hidden !important; }
-  #certPrintArea,
-  #certPrintArea * { visibility: visible !important; }
-  #certPrintArea {
-    position: fixed; top: 0; left: 0;
-    width: 100%; height: 100%;
-    border-radius: 0; box-shadow: none;
-    max-width: none;
-  }
-  .cert-preview,
-  .cert-preview * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    color-adjust: exact !important;
-  }
-  .cert-preview { background: #FFFFFF !important; }
-  .cert-preview .institute,
-  .cert-preview .title,
-  .cert-preview .title-sub,
-  .cert-preview .student-name,
-  .cert-preview .body-text,
-  .cert-preview .body-text .course,
-  .cert-preview .remarks-box,
-  .cert-preview .certify-line,
-  .cert-preview .bottom-row .lbl,
-  .cert-preview .bottom-row .val,
-  .cert-preview .bottom-row .sign,
-  .cert-preview .bottom-row .role,
-  .cert-preview .bottom-row .person {
-    color: #000000 !important;
-    -webkit-text-stroke: 0.15px #000000;
-    text-shadow: 0 0 0.3px #000000;
-  }
-  .cert-preview .frame,
-  .cert-preview .frame::before { border-color: #000000 !important; }
-  .cert-preview .ribbon { background: #000000 !important; }
-  .cert-preview .badge-exc { background: #B8860B !important; color: #000000 !important; }
-  .cert-preview .official-stamp { opacity: 1 !important; }
-  .cert-preview .official-stamp img { filter: contrast(1.8) brightness(0.65) !important; }
-  .cert-preview .watermark { opacity: 0.09 !important; }
-  .cert-preview .watermark span { color: #0B2A52 !important; }
-
-  .modal-backdrop {
-    position: static !important;
-    display: block !important;
-    background: none !important;
-    backdrop-filter: none !important;
-    padding: 0 !important;
-  }
-  .modal-box {
-    max-width: none !important;
-    max-height: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-  }
-  .modal-box h2,
-  .modal-box > div:last-child { display: none !important; }
-  .modal-box > div:last-child button { display: none !important; }
-}
-
 @media(max-width:900px){
   .sidebar{position:fixed;top:0;left:0;height:100vh;z-index:95;transform:translateX(-100%);transition:transform 0.25s}
   .sidebar.open{transform:translateX(0)}
@@ -643,8 +578,8 @@ tbody tr:hover{background:#f8fafc}
     <div id="certModalContent"></div>
     <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1.5rem;flex-wrap:wrap">
       <button class="btn btn-outline" onclick="closeViewCert()">Close</button>
-      <button class="btn btn-success" onclick="downloadCert()"><i class="fas fa-download"></i> Download</button>
-<button class="btn btn-primary" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
+      <button class="btn btn-success" onclick="downloadCert()"><i class="fas fa-download"></i> Download PDF</button>
+      <button class="btn btn-primary" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
     </div>
   </div>
 </div>
@@ -707,7 +642,7 @@ function goPage(name) {
 async function boot() {
   try {
     const { user } = await api('/auth/me');
-    if (user && user.role === 'admin') { currentUser = user; showApp(); return; }
+    if (user && (user.role === 'admin' || user.role === 'super_admin')) { currentUser = user; showApp(); return; }
   } catch (e) {}
   goPage('login');
 }
@@ -730,7 +665,7 @@ async function loginUser(e) {
       password: document.getElementById('loginPassword').value,
     }});
     const { user } = await api('/auth/me');
-    if (!user || user.role !== 'admin') {
+    if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
       await api('/auth/logout', { method: 'POST' });
       throw new Error('Admin access only.');
     }
@@ -812,7 +747,6 @@ function renderAuditPanel(d) {
   const s = d.student;
   const e = d.eligibility;
 
-  // Verdict badge
   const verdictStyles = {
     ready:   { bg:'#dcfce7', fg:'#166534', icon:'✅', label:'READY TO ISSUE' },
     partial: { bg:'#fef3c7', fg:'#92400e', icon:'⚠️', label:'ALMOST READY' },
@@ -820,7 +754,6 @@ function renderAuditPanel(d) {
   };
   const v = verdictStyles[e.verdict] || verdictStyles.not_ready;
 
-  // Enrollments table
   const enrHTML = !d.enrollments.length
     ? '<p style="color:var(--text-secondary);font-size:0.85rem;padding:0.5rem 0">Not enrolled in any course.</p>'
     : d.enrollments.map(en => `
@@ -838,7 +771,6 @@ function renderAuditPanel(d) {
           </div>
         </div>`).join('');
 
-  // Exams
   const examsHTML = !d.results.length
     ? '<p style="color:var(--text-secondary);font-size:0.85rem;padding:0.5rem 0">No exam attempts yet.</p>'
     : d.results.slice(0, 10).map(r => `
@@ -847,7 +779,6 @@ function renderAuditPanel(d) {
           <span style="color:${r.passed ? '#16A34A' : '#dc2626'};font-weight:700">${r.score}/${r.total_marks} (${parseFloat(r.percentage).toFixed(0)}%)</span>
         </div>`).join('');
 
-  // Groups
   const groupsHTML = !d.groups.length
     ? '<p style="color:var(--text-secondary);font-size:0.85rem;padding:0.5rem 0">Not in any group.</p>'
     : d.groups.map(g => `
@@ -856,7 +787,6 @@ function renderAuditPanel(d) {
           <span style="color:var(--text-secondary)">${g.my_messages} messages</span>
         </div>`).join('');
 
-  // Certificates already issued
   const certsHTML = !d.certificates_issued.length
     ? '<p style="color:var(--text-secondary);font-size:0.85rem;padding:0.5rem 0">None issued yet.</p>'
     : d.certificates_issued.map(c => `
@@ -868,13 +798,11 @@ function renderAuditPanel(d) {
           <div style="font-size:0.72rem;color:var(--text-secondary);margin-top:2px">${esc(c.certificate_id)} · ${fmtDate(c.issued_date)}</div>
         </div>`).join('');
 
-  // Warnings/reasons
   const reasonsHTML = !e.reasons.length
     ? '<div style="color:#166534;font-size:0.85rem;padding:0.5rem 0">✅ No blockers detected</div>'
     : e.reasons.map(r => `<div style="color:#92400e;font-size:0.82rem;padding:0.25rem 0">⚠️ ${esc(r)}</div>`).join('');
 
   panel.innerHTML = `
-    <!-- STUDENT HEADER -->
     <div style="background:linear-gradient(135deg,#0B1F3A,#172B4D);color:#fff;padding:1.25rem;border-radius:14px 14px 0 0;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap">
       <div>
         <div style="font-size:0.7rem;letter-spacing:2px;opacity:0.7;text-transform:uppercase">Student Audit</div>
@@ -887,13 +815,11 @@ function renderAuditPanel(d) {
       </div>
     </div>
 
-    <!-- VERDICT -->
     <div style="background:${v.bg};color:${v.fg};padding:0.9rem 1.25rem;display:flex;align-items:center;gap:0.75rem;font-weight:700;font-size:0.9rem">
       <span style="font-size:1.2rem">${v.icon}</span>
       <span>${v.label} — ${esc(e.recommendation)}</span>
     </div>
 
-    <!-- 4-COLUMN GRID -->
     <div style="background:#fff;border-radius:0 0 14px 14px;overflow:hidden">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0">
         <div style="padding:1rem 1.25rem;border-right:1px solid #e2e8f0">
@@ -934,19 +860,24 @@ async function loadIssueDropdowns() {
   const courseSel = document.getElementById('issueCourse');
   studentSel.innerHTML = '<option value="">Loading...</option>';
   courseSel.innerHTML = '<option value="">Loading...</option>';
+  
   try {
     const [{ students }, { courses }] = await Promise.all([
       api('/admin/students'),
       api('/courses'),
     ]);
+    
     studentSel.innerHTML = '<option value="">Select a student...</option>' +
       (students || []).map(s => `<option value="${s.id}">${esc(s.full_name)} — ${esc(s.email)}</option>`).join('');
+      
     courseSel.innerHTML = '<option value="">Select a course...</option>' +
-      // Hook the dropdown to load the audit panel on selection
-studentSel.addEventListener('change', function() {
-  loadStudentAudit(this.value);
-});
       (courses || []).map(c => `<option value="${c.id}">${esc(c.title)}</option>`).join('');
+
+    // Hook the dropdown to load the audit panel on selection
+    studentSel.addEventListener('change', function() {
+      loadStudentAudit(this.value);
+    });
+    
   } catch (err) {
     studentSel.innerHTML = '<option value="">Failed to load students</option>';
     courseSel.innerHTML = '<option value="">Failed to load courses</option>';
@@ -1113,7 +1044,6 @@ async function viewCert(certificateId) {
     const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=0&data=${encodeURIComponent(verifyUrl)}`;
     const certType = (c.certificate_type || 'Completion').toUpperCase();
 
-    // Watermark repeated 9 times in a 3x3 grid
     const watermarkCells = Array(9).fill('<span>NEXORA ACADEMY</span>').join('');
 
     document.getElementById('certModalContent').innerHTML = `
@@ -1234,29 +1164,56 @@ async function viewCert(certificateId) {
 function downloadCert() {
     const certArea = document.getElementById('certPrintArea');
     if (!certArea) { alert('No certificate to download'); return; }
+    
     const certId = (certArea.querySelector('.bottom-row .val')?.textContent || 'certificate').trim();
-    // Use browser's print-to-PDF feature (works everywhere, no library needed)
-    // Popup instructs user to "Save as PDF"
+    
+    // Grab all styles from the current page so the PDF is perfectly styled
+    const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+        .map(el => el.outerHTML)
+        .join('\n');
+
     const w = window.open('', '_blank');
     w.document.write(`
-      <html><head><title>${certId}</title>
-      <link rel="preconnect" href="https://fonts.googleapis.com">
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-      <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-      <style>
-        @page { size: A4 landscape; margin: 0; }
-        html, body { margin: 0; padding: 0; background: #fff; }
-        body > * { display: none; }
-        body > #certPrintArea { display: block !important; }
-      </style>
-      </head><body>${certArea.outerHTML}
-      <script>
-        window.addEventListener('load', () => {
-          setTimeout(() => { window.print(); }, 800);
-        });
-      <\/script>
-      </body></html>`);
+      <html>
+      <head>
+        <title>${certId}</title>
+        ${styles}
+        <style>
+          /* Force exact A4 Landscape sizing for PDF */
+          @page { size: A4 landscape; margin: 0; }
+          html, body { margin: 0; padding: 0; background: #fff; overflow: hidden; }
+          
+          .cert-preview {
+            margin: 0 !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            max-width: 100vw !important;
+            max-height: 100vh !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            page-break-inside: avoid;
+          }
+          
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+          }
+        </style>
+      </head>
+      <body>
+        ${certArea.outerHTML}
+        <script>
+          window.addEventListener('load', () => {
+            setTimeout(() => { 
+              window.print(); 
+              window.close(); 
+            }, 800);
+          });
+        <\/script>
+      </body>
+      </html>
+    `);
     w.document.close();
 }
   
