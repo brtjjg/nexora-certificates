@@ -1215,7 +1215,6 @@ function downloadCert() {
     const certArea = document.getElementById('certPrintArea');
     if (!certArea) { alert('No certificate to print'); return; }
 
-    // 1. Create a hidden iframe
     const iframe = document.createElement('iframe');
     iframe.style.position = 'fixed';
     iframe.style.right = '0';
@@ -1225,12 +1224,10 @@ function downloadCert() {
     iframe.style.border = '0';
     document.body.appendChild(iframe);
 
-    // 2. Get all the CSS from the current page (fonts, styles)
     const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
         .map(el => el.outerHTML)
         .join('\n');
 
-    // 3. Write the clean document into the iframe
     const doc = iframe.contentWindow.document;
     doc.open();
     doc.write(`
@@ -1240,8 +1237,11 @@ function downloadCert() {
             <title>Print Certificate</title>
             ${styles}
             <style>
-                /* FORCE EXACT A4 LANDSCAPE FOR THE IFRAME */
-                @page { size: A4 landscape; margin: 0; }
+                /* FORCE EXACT A4 LANDSCAPE */
+                @page { 
+                    size: A4 landscape; 
+                    margin: 0; 
+                }
                 
                 html, body {
                     width: 297mm;
@@ -1252,8 +1252,11 @@ function downloadCert() {
                     overflow: hidden;
                 }
 
-                /* Force the certificate to fill the page perfectly */
+                /* Force the certificate to fill 100% of the page */
                 .cert-preview {
+                    position: absolute !important;
+                    top: 0 !important;
+                    left: 0 !important;
                     width: 297mm !important;
                     height: 210mm !important;
                     max-width: none !important;
@@ -1262,11 +1265,6 @@ function downloadCert() {
                     border: none !important;
                     box-shadow: none !important;
                     
-                    /* Slight scale down to avoid printer edge clipping */
-                    transform: scale(0.98) !important;
-                    transform-origin: top left !important;
-                    
-                    /* Ensure backgrounds print */
                     -webkit-print-color-adjust: exact !important;
                     print-color-adjust: exact !important;
                 }
@@ -1279,20 +1277,15 @@ function downloadCert() {
     `);
     doc.close();
 
-    // 4. Wait for fonts/images to load, then print
     iframe.onload = function() {
         setTimeout(() => {
             iframe.contentWindow.focus();
             iframe.contentWindow.print();
-            
-            // Clean up the iframe after printing
-            setTimeout(() => {
-                document.body.removeChild(iframe);
-            }, 1000);
-        }, 500); // 500ms delay ensures Google Fonts load
+            setTimeout(() => { document.body.removeChild(iframe); }, 1000);
+        }, 500);
     };
 }
-  
+
 function closeViewCert() {
   document.getElementById('viewCertModal').classList.remove('active');
 }
