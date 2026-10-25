@@ -417,12 +417,60 @@ tbody tr:hover{background:#f8fafc}
 .modal-box{background:#fff;border-radius:var(--radius);box-shadow:0 20px 60px rgba(0,0,0,0.3);max-width:1100px;width:100%;max-height:92vh;overflow-y:auto;padding:1.75rem;margin:auto}
 .modal-box h2{color:var(--navy);margin-bottom:1.25rem;display:flex;align-items:center;gap:10px;font-size:1.15rem}
 
-@media(max-width:900px){
-  .sidebar{position:fixed;top:0;left:0;height:100vh;z-index:95;transform:translateX(-100%);transition:transform 0.25s}
-  .sidebar.open{transform:translateX(0)}
-  .content{padding:1.25rem 1rem}
-  .nav-toggle{display:inline-flex}
-  .form-row{grid-template-columns:1fr}
+/* ═══════════════════════════════════════════════════════
+   PRINT STYLES (CRITICAL FOR PDF DOWNLOAD)
+   ═══════════════════════════════════════════════════════ */
+@media print {
+  @page { size: A4 landscape; margin: 0; }
+  
+  /* Hide everything on the page */
+  body > * { display: none !important; visibility: hidden !important; }
+  
+  /* Only show the modal and the certificate */
+  .modal-backdrop { 
+    display: block !important; 
+    visibility: visible !important; 
+    position: absolute !important; 
+    inset: 0 !important; 
+    background: transparent !important; 
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .modal-box {
+    display: block !important;
+    visibility: visible !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    border-radius: 0 !important;
+  }
+  
+  /* Hide the modal header and buttons */
+  .modal-box h2, .modal-box > div:last-child { display: none !important; }
+  
+  /* Force the certificate to fill the A4 page perfectly */
+  #certPrintArea { 
+    display: block !important;
+    visibility: visible !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: none !important;
+    max-height: none !important;
+    page-break-inside: avoid !important;
+    page-break-after: avoid !important;
+  }
+  
+  /* Ensure all colors and backgrounds print */
+  .cert-preview, .cert-preview * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
 }
 </style>
 </head>
@@ -579,7 +627,6 @@ tbody tr:hover{background:#f8fafc}
     <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1.5rem;flex-wrap:wrap">
       <button class="btn btn-outline" onclick="closeViewCert()">Close</button>
       <button class="btn btn-success" onclick="downloadCert()"><i class="fas fa-download"></i> Download PDF</button>
-      <button class="btn btn-primary" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
     </div>
   </div>
 </div>
@@ -726,9 +773,6 @@ async function loadDashboard() {
   } catch (err) { console.error(err); }
 }
 
-/* ═══════════════════════════════════════════
-   STUDENT AUDIT PANEL
-   ═══════════════════════════════════════════ */
 async function loadStudentAudit(studentId) {
   const panel = document.getElementById('auditPanel');
   if (!studentId) { panel.classList.add('hidden'); panel.innerHTML = ''; return; }
@@ -873,7 +917,6 @@ async function loadIssueDropdowns() {
     courseSel.innerHTML = '<option value="">Select a course...</option>' +
       (courses || []).map(c => `<option value="${c.id}">${esc(c.title)}</option>`).join('');
 
-    // Hook the dropdown to load the audit panel on selection
     studentSel.addEventListener('change', function() {
       loadStudentAudit(this.value);
     });
@@ -1162,59 +1205,9 @@ async function viewCert(certificateId) {
 }
 
 function downloadCert() {
-    const certArea = document.getElementById('certPrintArea');
-    if (!certArea) { alert('No certificate to download'); return; }
-    
-    const certId = (certArea.querySelector('.bottom-row .val')?.textContent || 'certificate').trim();
-    
-    // Grab all styles from the current page so the PDF is perfectly styled
-    const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
-        .map(el => el.outerHTML)
-        .join('\n');
-
-    const w = window.open('', '_blank');
-    w.document.write(`
-      <html>
-      <head>
-        <title>${certId}</title>
-        ${styles}
-        <style>
-          /* Force exact A4 Landscape sizing for PDF */
-          @page { size: A4 landscape; margin: 0; }
-          html, body { margin: 0; padding: 0; background: #fff; overflow: hidden; }
-          
-          .cert-preview {
-            margin: 0 !important;
-            border-radius: 0 !important;
-            box-shadow: none !important;
-            max-width: 100vw !important;
-            max-height: 100vh !important;
-            width: 100vw !important;
-            height: 100vh !important;
-            page-break-inside: avoid;
-          }
-          
-          * {
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-            color-adjust: exact !important;
-          }
-        </style>
-      </head>
-      <body>
-        ${certArea.outerHTML}
-        <script>
-          window.addEventListener('load', () => {
-            setTimeout(() => { 
-              window.print(); 
-              window.close(); 
-            }, 800);
-          });
-        <\/script>
-      </body>
-      </html>
-    `);
-    w.document.close();
+    // Simply trigger the browser's native print dialog. 
+    // The @media print CSS at the top of the file handles the rest.
+    window.print();
 }
   
 function closeViewCert() {
